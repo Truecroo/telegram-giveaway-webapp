@@ -206,26 +206,11 @@
         }
 
         // Показываем успех
-        function showSuccess() {
+        function showSuccess(data) {
             content.innerHTML = `
                 <div class="icon">🎉</div>
-                <div class="title">Ты участвуешь!</div>
-                <div class="subtitle">Поздравляем! Ты успешно зарегистрирован в розыгрыше.</div>
-
-                <div class="info-block">
-                    <div class="info-row">
-                        <span class="info-label">📅 Дата розыгрыша</span>
-                        <span class="info-value">15 февраля</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">🎁 Приз</span>
-                        <span class="info-value">iPhone 15 Pro</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">👥 Участников</span>
-                        <span class="info-value">1,234</span>
-                    </div>
-                </div>
+                <div class="title">Ты участвуешь в розыгрыше!</div>
+                <div class="subtitle">Следи за объявлением победителя в канале.</div>
 
                 <div class="status-badge status-success">✓ Участие подтверждено</div>
             `;
@@ -240,19 +225,8 @@
         function showAlreadyJoined() {
             content.innerHTML = `
                 <div class="icon">⚠️</div>
-                <div class="title">Уже участвуешь</div>
-                <div class="subtitle">Ты уже зарегистрирован в этом розыгрыше. Удачи!</div>
-
-                <div class="info-block">
-                    <div class="info-row">
-                        <span class="info-label">📅 Дата розыгрыша</span>
-                        <span class="info-value">15 февраля</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">🎁 Приз</span>
-                        <span class="info-value">iPhone 15 Pro</span>
-                    </div>
-                </div>
+                <div class="title">Ты уже участвуешь!</div>
+                <div class="subtitle">Следи за объявлением победителя в канале.</div>
 
                 <div class="status-badge status-warning">⚠ Повторное участие невозможно</div>
             `;
