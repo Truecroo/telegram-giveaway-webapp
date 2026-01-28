@@ -187,9 +187,9 @@
         tg.expand();
         tg.ready();
 
-        // Получаем параметры из URL
+        // Получаем параметры из URL или из Telegram startapp
         const urlParams = new URLSearchParams(window.location.search);
-        const giveawayId = urlParams.get('giveaway_id');
+        const giveawayId = urlParams.get('giveaway_id') || tg.initDataUnsafe?.start_param;
         const userId = tg.initDataUnsafe?.user?.id;
         const username = tg.initDataUnsafe?.user?.username;
         const firstName = tg.initDataUnsafe?.user?.first_name;
