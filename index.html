@@ -297,13 +297,14 @@
             tg.openTelegramLink('https://t.me/wnmtest');
         }
 
-        // Основная логика
+        // Основная логика - отправляем запрос в webhook
         async function checkAndJoin() {
             showLoader();
 
             try {
-                // Здесь должен быть твой API endpoint из n8n
-                const response = await fetch('YOUR_N8N_WEBHOOK_URL', {
+                const webhookUrl = 'https://workflow.xsolla.com/webhook/giveaway-webapp';
+
+                const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -318,7 +319,7 @@
 
                 const data = await response.json();
 
-                // Обрабатываем ответ
+                // Обрабатываем ответ от твоего пайплайна
                 if (data.status === 'success') {
                     showSuccess();
                 } else if (data.status === 'already_joined') {
