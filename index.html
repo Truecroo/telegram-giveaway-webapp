@@ -339,13 +339,24 @@
         }
 
         // Запускаем при загрузке
-        if (giveawayId && userId) {
-            checkAndJoin();
+        if (giveawayId) {
+            // Даем время на инициализацию Telegram SDK
+            setTimeout(() => {
+                if (tg.initDataUnsafe?.user?.id) {
+                    checkAndJoin();
+                } else {
+                    content.innerHTML = `
+                        <div class="icon">❓</div>
+                        <div class="title">Ошибка инициализации</div>
+                        <div class="subtitle">Не удалось получить данные пользователя. Попробуйте снова.</div>
+                    `;
+                }
+            }, 500);
         } else {
             content.innerHTML = `
                 <div class="icon">❓</div>
                 <div class="title">Неверная ссылка</div>
-                <div class="subtitle">Эта страница должна открываться из Telegram.</div>
+                <div class="subtitle">Отсутствует ID розыгрыша.</div>
             `;
         }
     </script>
