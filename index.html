@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Розыгрыш</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .info-block {
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .info-row:not(:last-child) {
+            border-bottom: 1px solid var(--tg-theme-secondary-bg-color, #f4f4f5);
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .button {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .button:active {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+
+        .status-success {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+        }
+
+        .status-error {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff3b30;
+        }
+
+        .status-warning {
+            background: rgba(255, 149, 0, 0.15);
+            color: #ff9500;
+        }
+
+        .loader {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top: 3px solid var(--tg-theme-button-color, #3390ec);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div id="content">
+                <!-- Контент будет динамически загружаться -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Получаем параметры из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const giveawayId = urlParams.get('giveaway_id');
+        const userId = tg.initDataUnsafe?.user?.id;
+        const username = tg.initDataUnsafe?.user?.username;
+        const firstName = tg.initDataUnsafe?.user?.first_name;
+
+        const content = document.getElementById('content');
+
+        // Показываем loader
+        function showLoader() {
+            content.innerHTML = `
+                <div class="icon">⏳</div>
+                <div class="title">Загрузка...</div>
+                <div class="loader"></div>
+            `;
+        }
+
+        // Показываем успех
+        function showSuccess() {
+            content.innerHTML = `
+                <div class="icon">🎉</div>
+                <div class="title">Ты участвуешь!</div>
+                <div class="subtitle">Поздравляем! Ты успешно зарегистрирован в розыгрыше.</div>
+
+                <div class="info-block">
+                    <div class="info-row">
+                        <span class="info-label">📅 Дата розыгрыша</span>
+                        <span class="info-value">15 февраля</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">🎁 Приз</span>
+                        <span class="info-value">iPhone 15 Pro</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">👥 Участников</span>
+                        <span class="info-value">1,234</span>
+                    </div>
+                </div>
+
+                <div class="status-badge status-success">✓ Участие подтверждено</div>
+            `;
+
+            // Закрываем через 3 секунды
+            setTimeout(() => {
+                tg.close();
+            }, 3000);
+        }
+
+        // Показываем ошибку - уже участвует
+        function showAlreadyJoined() {
+            content.innerHTML = `
+                <div class="icon">⚠️</div>
+                <div class="title">Уже участвуешь</div>
+                <div class="subtitle">Ты уже зарегистрирован в этом розыгрыше. Удачи!</div>
+
+                <div class="info-block">
+                    <div class="info-row">
+                        <span class="info-label">📅 Дата розыгрыша</span>
+                        <span class="info-value">15 февраля</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">🎁 Приз</span>
+                        <span class="info-value">iPhone 15 Pro</span>
+                    </div>
+                </div>
+
+                <div class="status-badge status-warning">⚠ Повторное участие невозможно</div>
+            `;
+
+            setTimeout(() => {
+                tg.close();
+            }, 2500);
+        }
+
+        // Показываем ошибку - не подписан
+        function showNotSubscribed() {
+            content.innerHTML = `
+                <div class="icon">❌</div>
+                <div class="title">Требуется подписка</div>
+                <div class="subtitle">Чтобы участвовать в розыгрыше, необходимо подписаться на канал.</div>
+
+                <button class="button" onclick="openChannel()">
+                    Подписаться на канал
+                </button>
+
+                <div class="status-badge status-error">✗ Подписка не найдена</div>
+            `;
+        }
+
+        // Показываем ошибку - розыгрыш завершён
+        function showGiveawayEnded() {
+            content.innerHTML = `
+                <div class="icon">🏁</div>
+                <div class="title">Розыгрыш завершён</div>
+                <div class="subtitle">К сожалению, этот розыгрыш уже завершён.</div>
+
+                <div class="status-badge status-error">✗ Участие невозможно</div>
+            `;
+
+            setTimeout(() => {
+                tg.close();
+            }, 2500);
+        }
+
+        // Функция открытия канала
+        function openChannel() {
+            tg.openTelegramLink('https://t.me/wnmtest');
+        }
+
+        // Основная логика
+        async function checkAndJoin() {
+            showLoader();
+
+            try {
+                // Здесь должен быть твой API endpoint из n8n
+                const response = await fetch('YOUR_N8N_WEBHOOK_URL', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        giveaway_id: giveawayId,
+                        user_id: userId,
+                        username: username,
+                        first_name: firstName
+                    })
+                });
+
+                const data = await response.json();
+
+                // Обрабатываем ответ
+                if (data.status === 'success') {
+                    showSuccess();
+                } else if (data.status === 'already_joined') {
+                    showAlreadyJoined();
+                } else if (data.status === 'not_subscribed') {
+                    showNotSubscribed();
+                } else if (data.status === 'ended') {
+                    showGiveawayEnded();
+                }
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="icon">😔</div>
+                    <div class="title">Ошибка</div>
+                    <div class="subtitle">Что-то пошло не так. Попробуй позже.</div>
+                `;
+            }
+        }
+
+        // Запускаем при загрузке
+        if (giveawayId && userId) {
+            checkAndJoin();
+        } else {
+            content.innerHTML = `
+                <div class="icon">❓</div>
+                <div class="title">Неверная ссылка</div>
+                <div class="subtitle">Эта страница должна открываться из Telegram.</div>
+            `;
+        }
+    </script>
+</body>
+</html>
