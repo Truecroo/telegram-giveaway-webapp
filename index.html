@@ -249,15 +249,16 @@
         }
 
         // Показываем ошибку - не подписан
-        function showNotSubscribed() {
+        function showNotSubscribed(channel) {
+            const channelName = channel ? channel.replace('@', '') : '';
             content.innerHTML = `
                 <div class="icon">❌</div>
                 <div class="title">Требуется подписка</div>
                 <div class="subtitle">Чтобы участвовать в розыгрыше, необходимо подписаться на канал.</div>
 
-                <button class="button" onclick="openChannel()">
+                ${channelName ? `<button class="button" onclick="openChannel('${channelName}')">
                     Подписаться на канал
-                </button>
+                </button>` : ''}
 
                 <div class="status-badge status-error">✗ Подписка не найдена</div>
             `;
@@ -279,8 +280,10 @@
         }
 
         // Функция открытия канала
-        function openChannel() {
-            tg.openTelegramLink('https://t.me/wnmtest');
+        function openChannel(channelName) {
+            if (channelName) {
+                tg.openTelegramLink('https://t.me/' + channelName);
+            }
         }
 
         // Основная логика - отправляем запрос в webhook
@@ -311,7 +314,7 @@
                 } else if (data.status === 'already_joined') {
                     showAlreadyJoined();
                 } else if (data.status === 'not_subscribed') {
-                    showNotSubscribed();
+                    showNotSubscribed(data.channel);
                 } else if (data.status === 'ended') {
                     showGiveawayEnded();
                 }
